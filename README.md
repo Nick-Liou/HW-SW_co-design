@@ -1,2 +1,2 @@
 # HW-SW_co-design
-Matrix Mult using FPGA
+Matrix Mult using FPGA test
