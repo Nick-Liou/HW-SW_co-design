@@ -54,30 +54,31 @@ void MATRIX_MUL(const 	uint512_dt A[n * m / VECTOR_SIZE] , 	// Read-Only Matrix 
 	loop1:
 		for( int i = 0 ; i < n ; i++ ){
 			loop2:
+
+			uint512_dt tmpOut = 0;
+
 			for ( int k = 0 ; k < p ; k++ ){
 				#pragma HLS PIPELINE II=1
 
 				num_t_res temp = 0 ;
-				// uint512_dt tmpV1 = v1_local[j];
-				// uint512_dt tmpV2 = v2_local[j];
 
-				// uint512_dt tmpOut = 0;
 
 				loop3:
 				for ( int j = 0 ; j < m ; j++ ){
 					// We know m = 16 
-					ap_uint<32> tmp1 = ker_A.range(i*m+  32 * (j + 1) - 1, i*m+  j * 32);
-					ap_uint<32> tmp2 = ker_B.range(k*p+  32 * (j + 1) - 1, k*p+  j * 32);
-					// tmpOut.range(32 * (j + 1) - 1, j * 32) 
+					ap_int<32> tmp1 = ker_A[i*m].range( 32 * (j + 1) - 1,  j * 32);
+					ap_int<32> tmp2 = ker_B[k*p].range( 32 * (j + 1) - 1,  j * 32);
+					
 					temp += tmp1 * tmp2;
-
-
+					// tmpOut.range(32 * (k + 1) - 1, k * 32) += tmp1 * tmp2; 
 
 					// temp += ker_A[i*m+j]*ker_B[k*p+j] ;	// with B = BT transpose
 
 				}
-				C[i*p+k] = temp ;
+				// C[i*p+k] = temp ; // num_t_res 
+				tmpOut.range(32 * (k + 1) - 1, k * 32) = temp ; 
 			}
+			C[i*p] = tmpOut ; // uint512_dt
 		}
 
 //	loop1:
