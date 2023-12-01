@@ -6,7 +6,7 @@
 #include "../../wide_vadd/src/definitions.hpp"
 
 typedef ap_uint<512> uint512_dt;
-#define VECTOR_SIZE (512 / 32) // j size is 16 (512/32 = 16)
+#define VECTOR_SIZE (512 / 32) // VECTOR_SIZE size is 16 (512/32 = 16)
 
 /*
     Matrix Multiplication Kernel Implementation
@@ -37,12 +37,12 @@ void MATRIX_MUL(const 	uint512_dt A[n * m / VECTOR_SIZE] , 	// Read-Only Matrix 
 
 
 	copyA:
-	for ( int i =0 ; i < n*m/VECTOR_SIZE ;i++){
+	for ( int i = 0 ; i < n*m/VECTOR_SIZE ; i++){
 		#pragma HLS PIPELINE II = 1
 		ker_A[i] = A[i];
 	}
 	copyB:
-	for ( int i =0 ; i < m*p/VECTOR_SIZE ;i++){
+	for ( int i = 0 ; i < m*p/VECTOR_SIZE ; i++){
 		#pragma HLS PIPELINE II = 1
 		ker_B[i] = B[i];
 	}
@@ -52,34 +52,34 @@ void MATRIX_MUL(const 	uint512_dt A[n * m / VECTOR_SIZE] , 	// Read-Only Matrix 
 //	#pragma HLS array_partition type=cyclic 	variable=ker_C 	factor= p
 
 	loop1:
-		for( int i = 0 ; i < n ; i++ ){
-			loop2:
+	for( int i = 0 ; i < n ; i++ ){
 
-			uint512_dt tmpOut = 0;
+		uint512_dt tmpOut = 0;
 
-			for ( int k = 0 ; k < p ; k++ ){
-				#pragma HLS PIPELINE II=1
+		loop2:
+		for ( int k = 0 ; k < p ; k++ ){
+			#pragma HLS PIPELINE II=1
 
-				num_t_res temp = 0 ;
+			num_t_res temp = 0 ;
 
 
-				loop3:
-				for ( int j = 0 ; j < m ; j++ ){
-					// We know m = 16 
-					ap_int<32> tmp1 = ker_A[i*m].range( 32 * (j + 1) - 1,  j * 32);
-					ap_int<32> tmp2 = ker_B[k*p].range( 32 * (j + 1) - 1,  j * 32);
-					
-					temp += tmp1 * tmp2;
-					// tmpOut.range(32 * (k + 1) - 1, k * 32) += tmp1 * tmp2; 
+			loop3:
+			for ( int j = 0 ; j < m ; j++ ){
+				// We know m = 16 
+				ap_int<32> tmp1 = ker_A[i*m].range( 32 * (j + 1) - 1,  j * 32);
+				ap_int<32> tmp2 = ker_B[k*p].range( 32 * (j + 1) - 1,  j * 32);
+				
+				temp += tmp1 * tmp2;
+				// tmpOut.range(32 * (k + 1) - 1, k * 32) += tmp1 * tmp2; 
 
-					// temp += ker_A[i*m+j]*ker_B[k*p+j] ;	// with B = BT transpose
+				// temp += ker_A[i*m+j]*ker_B[k*p+j] ;	// with B = BT transpose
 
-				}
-				// C[i*p+k] = temp ; // num_t_res 
-				tmpOut.range(32 * (k + 1) - 1, k * 32) = temp ; 
 			}
-			C[i*p] = tmpOut ; // uint512_dt
+			// C[i*p+k] = temp ; // num_t_res 
+			tmpOut.range(32 * (k + 1) - 1, k * 32) = temp ; 
 		}
+	C[i] = tmpOut ; // uint512_dt
+	}
 
 //	loop1:
 //	for( int i = 0 ; i < n ; i++ ){
