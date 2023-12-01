@@ -48,6 +48,8 @@ used in kernel.
 
 #include "../../wide_vadd/src/definitions.hpp"
 
+typedef ap_uint<512> uint512_dt;
+#define VECTOR_SIZE (DATAWIDTH / 32) // vector size is 16 (512/32 = 16)
 
 /*
     Matrix Multiplication Kernel Implementation
@@ -58,54 +60,76 @@ used in kernel.
 */
 
 extern "C" {
-void MATRIX_MUL(const 	num_t  		A[n * m] , 	// Read-Only Matrix A
-				const	num_t  		B[m * p] , 	// Read-Only Matrix B
-						num_t_res  	C[n * p]	// Output Result Matrix C = A*B
+void MATRIX_MUL(const 	uint512_dt A[n * m] , 	// Read-Only Matrix A
+				const	uint512_dt B[m * p] , 	// Read-Only Matrix B
+						uint512_dt C[n * p]	// Output Result Matrix C = A*B
 					){
 
 	// ========================= OURS ========================= //
-	#pragma HLS INTERFACE m_axi port = A offset = slave bundle = gmem
-	#pragma HLS INTERFACE m_axi port = B offset = slave bundle = gmem
-	#pragma HLS INTERFACE m_axi port = C offset = slave bundle = gmem
+	#pragma HLS INTERFACE m_axi port = A bundle = gmem
+	#pragma HLS INTERFACE m_axi port = B bundle = gmem1
+	#pragma HLS INTERFACE m_axi port = C bundle = gmem2
 	#pragma HLS INTERFACE s_axilite port = A bundle = control
 	#pragma HLS INTERFACE s_axilite port = B bundle = control
 	#pragma HLS INTERFACE s_axilite port = C bundle = control
 	#pragma HLS INTERFACE s_axilite port = return bundle = control
 
-	num_t ker_A [n*m];
-	num_t ker_B [m*p];
-	num_t_res ker_C [n*p];
+	uint512_dt ker_A [n*m /VECTOR_SIZE ];
+	uint512_dt ker_B [m*p /VECTOR_SIZE ];
+	uint512_dt ker_C [n*p /VECTOR_SIZE ];
 
-	for ( int i =0 ; i < n*m ;i++){
+
+	copyA:
+	for ( int i =0 ; i < n*m/VECTOR_SIZE ;i++){
 		#pragma HLS PIPELINE II = 1
 		ker_A[i] = A[i];
 	}
-	for ( int i =0 ; i < m*p ;i++){
+	copyB:
+	for ( int i =0 ; i < m*p/VECTOR_SIZE ;i++){
 		#pragma HLS PIPELINE II = 1
 		ker_B[i] = B[i];
 	}
 
-	#pragma HLS array_partition type=block 		variable=ker_A 	factor= n
-	#pragma HLS array_partition type=cyclic 	variable=ker_B  factor= p
-	#pragma HLS array_partition type=cyclic 	variable=ker_C 	factor= p
+//	#pragma HLS array_partition type=block 		variable=ker_A 	factor= n
+//	#pragma HLS array_partition type=cyclic 	variable=ker_B  factor= p
+//	#pragma HLS array_partition type=cyclic 	variable=ker_C 	factor= p
 
 	loop1:
-	for( int i = 0 ; i < n ; i++ ){
-		loop2:
-		for ( int k = 0 ; k < p ; k++ ){
-			#pragma HLS PIPELINE II=1
+		for( int i = 0 ; i < n ; i++ ){
+			loop2:
+			for ( int k = 0 ; k < p ; k++ ){
+				#pragma HLS PIPELINE II=1
 
-			num_t_res temp = 0 ;
+				num_t_res temp = 0 ;
 
-			loop3:
-			for ( int j = 0 ; j < m ; j++ ){
-//				#pragma HLS unroll factor= m 	// This is auto added
+				loop3:
+				for ( int j = 0 ; j < m ; j++ ){
 
-				temp += ker_A[i*m+j]*ker_B[j*p+k] ;
+
+//					temp += ker_A[i*m+j]*ker_B[j*p+k] ;
+					temp += ker_A[i*m+j]*ker_B[k*p+j] ;
+				}
+				C[i] = temp ;
 			}
-			C[i] = temp ;
 		}
-	}
+
+//	loop1:
+//	for( int i = 0 ; i < n ; i++ ){
+//		loop2:
+//		for ( int k = 0 ; k < p ; k++ ){
+//			#pragma HLS PIPELINE II=1
+//
+//			num_t_res temp = 0 ;
+//
+//			loop3:
+//			for ( int j = 0 ; j < m ; j++ ){
+////				#pragma HLS unroll factor= m 	// This is auto added
+//
+//				temp += ker_A[i*m+j]*ker_B[j*p+k] ;
+//			}
+//			C[i] = temp ;
+//		}
+//	}
 
 //	for ( int i =0 ; i < n*p ;i++){
 //		#pragma HLS PIPELINE II = 1
