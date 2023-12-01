@@ -62,6 +62,8 @@ void matrix_mul_soft( T1 * A , T2 * B , T3 * C , int dim1 , int dim2, int dim3 )
 template<typename T>
 bool test_matrix_equality( T* A , T* B , int dim1 , int dim2 ) ;
 
+template<typename T>
+void transpose_matrix( T * A , T* AT , int dim1 , int dim2 );
 
 int main(int argc, char **argv) {
   if (argc != 2) {
@@ -93,6 +95,7 @@ int main(int argc, char **argv) {
   et.add("Allocate Memory in Host Memory");
   std::vector<num_t, 	aligned_allocator<num_t>> 		A(n * m);
   std::vector<num_t, 	aligned_allocator<num_t>> 		B(m * p);
+  std::vector<num_t, 	aligned_allocator<num_t>> 		BT(m * p);
   std::vector<num_t_res,aligned_allocator<num_t_res>> 	C_SW(n * p);
   std::vector<num_t_res,aligned_allocator<num_t_res>> 	C_HW(n * p);
   et.finish();
@@ -108,6 +111,8 @@ int main(int argc, char **argv) {
 
   fill_with_rand(A.data() , n , m ) ;
   fill_with_rand(B.data() , m , p ) ;
+  
+  transpose_matrix(B, BT , m , p) ;
 
   // ===================== Prints ===================== //
 
@@ -175,7 +180,7 @@ int main(int argc, char **argv) {
 					 A.size()*sizeof(num_t), A.data(), &err));
   OCL_CHECK(err, cl::Buffer buffer_B(
                      context, CL_MEM_USE_HOST_PTR | CL_MEM_READ_ONLY,
-					 B.size()*sizeof(num_t), B.data(), &err));
+					 BT.size()*sizeof(num_t), BT.data(), &err));
   OCL_CHECK(err, cl::Buffer buffer_C(
                      context, CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
 					 C_HW.size()*sizeof(num_t_res), C_HW.data(), &err));
@@ -254,6 +259,18 @@ void print_matrix( T * A , int dim1 , int dim2 ){
     }
 
     printf( "\n" ) ;
+
+}
+
+
+template<typename T>
+void transpose_matrix( T * A , T* AT , int dim1 , int dim2 ){
+
+    for ( int i = 0 ; i < dim1; i++ ){
+        for ( int j = 0 ; j < dim2; j++ ){
+            AT [j*dim1+i ] = A[i*dim2+j] ; 
+        }
+    }
 
 }
 
