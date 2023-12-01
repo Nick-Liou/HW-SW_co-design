@@ -66,8 +66,8 @@ void MATRIX_MUL(const 	uint512_dt A[n * m / VECTOR_SIZE] , 	// Read-Only Matrix 
 			loop3:
 			for ( int j = 0 ; j < m ; j++ ){
 				// We know m = 16 
-				ap_int<32> tmp1 = ker_A[i*m].range( 32 * (j + 1) - 1,  j * 32);
-				ap_int<32> tmp2 = ker_B[k*p].range( 32 * (j + 1) - 1,  j * 32);
+				ap_int<32> tmp1 = ker_A[i].range( 32 * (j + 1) - 1,  j * 32);
+				ap_int<32> tmp2 = ker_B[k].range( 32 * (j + 1) - 1,  j * 32);
 				
 				temp += tmp1 * tmp2;
 				// tmpOut.range(32 * (k + 1) - 1, k * 32) += tmp1 * tmp2; 
@@ -78,7 +78,7 @@ void MATRIX_MUL(const 	uint512_dt A[n * m / VECTOR_SIZE] , 	// Read-Only Matrix 
 			// C[i*p+k] = temp ; // num_t_res 
 			tmpOut.range(32 * (k + 1) - 1, k * 32) = temp ; 
 		}
-	C[i] = tmpOut ; // uint512_dt
+		C[i] = tmpOut ; // uint512_dt
 	}
 
 //	loop1:
