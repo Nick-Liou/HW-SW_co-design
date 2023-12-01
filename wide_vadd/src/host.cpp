@@ -112,7 +112,7 @@ int main(int argc, char **argv) {
   fill_with_rand(A.data() , n , m ) ;
   fill_with_rand(B.data() , m , p ) ;
   
-  transpose_matrix(B, BT , m , p) ;
+  transpose_matrix(B.data(), BT.data() , m , p) ;
 
   // ===================== Prints ===================== //
 

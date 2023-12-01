@@ -6,7 +6,7 @@
 #include "../../wide_vadd/src/definitions.hpp"
 
 typedef ap_uint<512> uint512_dt;
-#define VECTOR_SIZE (DATAWIDTH / 32) // j size is 16 (512/32 = 16)
+#define VECTOR_SIZE (512 / 32) // j size is 16 (512/32 = 16)
 
 /*
     Matrix Multiplication Kernel Implementation
