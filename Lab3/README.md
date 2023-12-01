@@ -1,2 +1,1 @@
-# HW-SW_co-design
-Matrix Mult using FPGA 
+# Imporove memory access
