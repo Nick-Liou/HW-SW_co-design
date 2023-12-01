@@ -43,11 +43,12 @@ used in kernel.
 *******************************************************************************/
 
 
+//Including to use ap_uint<> datatype
+#include <ap_int.h>
+
 #include "../../wide_vadd/src/definitions.hpp"
 
 
-// This will do FULL unrolling EVERYTHING
-#define SUPER_MEGA_ULTRA_OPTIMIZATIONS false && OPTIMIZATIONS_CONDITION
 /*
     Matrix Multiplication Kernel Implementation
     Arguments:
