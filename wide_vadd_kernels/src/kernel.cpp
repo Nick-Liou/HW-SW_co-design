@@ -39,9 +39,9 @@ void MATRIX_MUL(const 	uint512_dt A[n * m / VECTOR_SIZE] , 	// Read-Only Matrix 
 
 
 	
-	#pragma HLS DATAFLOW
-	#pragma HLS stream variable = ker_A // depth = 64
-	#pragma HLS stream variable = ker_B // depth = 64
+	// #pragma HLS DATAFLOW
+	// #pragma HLS stream variable = ker_A // depth = 64
+	// #pragma HLS stream variable = ker_B // depth = 64
 	
 	// Copy data to the FPGA
 	copyA:
@@ -78,12 +78,10 @@ void MATRIX_MUL(const 	uint512_dt A[n * m / VECTOR_SIZE] , 	// Read-Only Matrix 
 				ap_int<32> tmp2 = ker_B[k].range( 32 * (j + 1) - 1,  j * 32);
 				
 				temp += tmp1 * tmp2;
-				// tmpOut.range(32 * (k + 1) - 1, k * 32) += tmp1 * tmp2; 
 
 				// temp += ker_A[i*m+j]*ker_B[k*p+j] ;	// with B = BT transpose
 
 			}
-			// C[i*p+k] = temp ; // num_t_res 
 			tmpOut.range(32 * (k + 1) - 1, k * 32) = temp ; 
 		}
 		C[i] = tmpOut ; // uint512_dt
@@ -106,13 +104,6 @@ void MATRIX_MUL(const 	uint512_dt A[n * m / VECTOR_SIZE] , 	// Read-Only Matrix 
 //			C[i] = temp ;
 //		}
 //	}
-
-//	for ( int i =0 ; i < n*p ;i++){
-//		#pragma HLS PIPELINE II = 1
-////		Move this in the triple for loop above for performance
-//		C[i] = ker_C[i];
-//	}
-
 
 
 } // Close function
