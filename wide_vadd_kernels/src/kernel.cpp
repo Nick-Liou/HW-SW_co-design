@@ -78,7 +78,7 @@ void MATRIX_MUL(const 	uint512_dt A[n * m / VECTOR_SIZE] , 	// Read-Only Matrix 
 				ap_int<32> tmp2 = ker_B[k].range( 32 * (j + 1) - 1,  j * 32);
 				
 				// temp += tmp1 * tmp2;
-				tmpOut.range(32 * (k + 1) - 1, k * 32) += tmp1 * tmp2; 
+				// tmpOut.range(32 * (k + 1) - 1, k * 32) += tmp1 * tmp2; 
 				C[i].range(32 * (k + 1) - 1, k * 32) += tmp1 * tmp2; 
 
 				// temp += ker_A[i*m+j]*ker_B[k*p+j] ;	// with B = BT transpose
