@@ -40,10 +40,12 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 //#define DATA_SIZE 4096
 
-#include "definitions.hpp"
 
 #include <stdio.h>
-#include<cstdlib>
+#include <cstdlib>
+
+
+#include "definitions.hpp"  // This should be included last!!! (to avoid problems with the Defines)
 
 #define PRINT_ALL_MATRICES
 

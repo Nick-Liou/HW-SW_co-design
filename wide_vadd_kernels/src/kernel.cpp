@@ -3,7 +3,8 @@
 //Including to use ap_uint<> datatype
 #include <ap_int.h>
 
-#include "../../wide_vadd/src/definitions.hpp"
+#include "../../wide_vadd/src/definitions.hpp"  // This should be included last!!! (to avoid problems with the Defines)
+
 
 typedef ap_uint<512> uint512_dt;
 #define VECTOR_SIZE (512 / 32) // VECTOR_SIZE size is 16 (512/32 = 16)
@@ -22,7 +23,7 @@ void MATRIX_MUL(const 	uint512_dt A[n * m / VECTOR_SIZE] , 	// Read-Only Matrix 
 						uint512_dt C[n * p / VECTOR_SIZE]		// Output Result Matrix C = A*B
 					){
 
-	// ========================= OURS ========================= //
+	// ========================= Interface ========================= //
 	#pragma HLS INTERFACE m_axi port = A bundle = gmem
 	#pragma HLS INTERFACE m_axi port = B bundle = gmem1
 	#pragma HLS INTERFACE m_axi port = C bundle = gmem2
@@ -31,11 +32,18 @@ void MATRIX_MUL(const 	uint512_dt A[n * m / VECTOR_SIZE] , 	// Read-Only Matrix 
 	#pragma HLS INTERFACE s_axilite port = C bundle = control
 	#pragma HLS INTERFACE s_axilite port = return bundle = control
 
+	// Arrays in local memmory in the FPGA
 	uint512_dt ker_A [n*m / VECTOR_SIZE ];
 	uint512_dt ker_B [m*p / VECTOR_SIZE ];
-	// uint512_dt ker_C [n*p / VECTOR_SIZE ];
+	
 
 
+	
+	#pragma HLS DATAFLOW
+	#pragma HLS stream variable = ker_A // depth = 64
+	#pragma HLS stream variable = ker_B // depth = 64
+	
+	// Copy data to the FPGA
 	copyA:
 	for ( int i = 0 ; i < n*m/VECTOR_SIZE ; i++){
 		#pragma HLS PIPELINE II = 1
